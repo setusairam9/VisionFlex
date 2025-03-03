@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessible PDF Reader</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+</head>
+<body>
+    <div id="header">
+        <h1>Accessible PDF Reader</h1>
+        <input type="file" id="fileInput" accept="application/pdf" onchange="loadPDF(event)">
+        <button onclick="editPDF()" id="editButton">Edit</button>
+    </div>
+    
+    <div id="controls">
+        <button onclick="applyFilter('none')">Normal</button>
+        <button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
+        <button onclick="applyFilter('invert(100%)')">Inverted</button>
+        <button onclick="applyFilter('sepia(100%)')">Sepia</button>
+        <button onclick="applyFilter('hue-rotate(90deg)')">Color Shift</button>
+        <button onclick="toggleFullscreen()">Fullscreen</button>
+    </div>
+    
+    <div id="viewer-container">
+        <canvas id="pdfCanvas"></canvas>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
