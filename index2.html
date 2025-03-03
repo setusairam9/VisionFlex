@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessible PDF Reader</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+</head>
+<body>
+    <div id="header">
+        <h1>Accessible PDF Reader</h1>
+        <input type="file" id="fileInput" accept="application/pdf" onchange="loadPDF(event)">
+        <button onclick="editPDF()" id="editButton">Edit</button>
+    </div>
+    
+    <div id="controls">
+        <button onclick="applyFilter('none')">Normal</button>
+        <button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
+        <button onclick="applyFilter('invert(100%)')">Inverted</button>
+        <button onclick="applyFilter('sepia(100%)')">Sepia</button>
+        <button onclick="applyFilter('hue-rotate(90deg)')">Color Shift</button>
+        <button class="filter-btn" onclick="applyProtanopia()">Protanopia</button>
+        <button class="filter-btn" onclick="applyDeuteranopia()">Deuteranopia</button>
+        <button class="filter-btn" onclick="applyTritanopia()">Tritanopia</button>
+        <button class="filter-btn" onclick="applyLightBlue()">Light Blue</button>
+        <button class="filter-btn" onclick="applyLightGreen()">Light Green</button>
+        <button class="filter-btn" onclick="applyLightPink()">Light Pink</button>
+        <button class="filter-btn" onclick="applyLightYellow()">Light Yellow</button>
+        <button class="filter-btn" onclick="applyGrayscale()">Grayscale</button>
+        <button class="filter-btn" onclick="applyInverted()">Inverted</button>
+        <button class="filter-btn" onclick="applyInvertedGrayscale()">Inverted Grayscale</button>
+        <button class="filter-btn" onclick="applyYellowOnBlue()">Yellow on Blue</button>
+        <button class="filter-btn" onclick="applyBlueOnYellow()">Blue on Yellow</button>
+        <button class="filter-btn" onclick="applyNeonOrangeOnBlack()">Neon Orange on Black</button>
+        <button class="filter-btn" onclick="applyNeonGreenOnBlack()">Neon Green on Black</button>
+        <button class="filter-btn" onclick="applyYellowOnBlack()">Yellow on Black</button>
+        <button class="filter-btn" onclick="applyPurpleOnBlack()">Purple on Black</button>
+        <button onclick="toggleFullscreen()">Fullscreen</button>
+    </div>
+    
+    <div id="viewer-container">
+        <div id="pdfViewer"></div>
+    </div>
+    
+    <script>
+        let pdfDoc = null, scale = 1.2;
+        const pdfViewer = document.getElementById("pdfViewer");
+
+        function loadPDF(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function() {
+                    const typedarray = new Uint8Array(this.result);
+                    pdfjsLib.getDocument(typedarray).promise.then(pdf => {
+                        pdfDoc = pdf;
+                        renderAllPages();
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function renderAllPages() {
+            pdfViewer.innerHTML = ""; // Clear previous pages
+            for (let num = 1; num <= pdfDoc.numPages; num++) {
+                pdfDoc.getPage(num).then(page => {
+                    const canvas = document.createElement("canvas");
+                    canvas.classList.add("pdf-page");
+                    pdfViewer.appendChild(canvas);
+                    const ctx = canvas.getContext("2d");
+
+                    const viewport = page.getViewport({ scale });
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    const renderContext = {
+                        canvasContext: ctx,
+                        viewport: viewport
+                    };
+                    page.render(renderContext);
+                });
+            }
+        }
+
+        function applyFilter(filter) {
+            document.querySelectorAll(".pdf-page").forEach(canvas => {
+                canvas.style.filter = filter;
+            });
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function editPDF() {
+            alert("Edit feature is under development!");
+        }
+
+        // Example predefined filters
+function applyNormal() {
+    applyFilter('none');
+}
+
+function applyProtanopia() {
+    applyFilter('grayscale(100%) sepia(100%) hue-rotate(270deg)');
+}
+
+function applyDeuteranopia() {
+    applyFilter('grayscale(100%) sepia(100%) hue-rotate(90deg)');
+}
+
+function applyTritanopia() {
+    applyFilter('grayscale(100%) sepia(100%) hue-rotate(180deg)');
+}
+
+function applyLightBlue() {
+    applyFilter('brightness(150%) contrast(100%) sepia(20%) hue-rotate(180deg)');
+}
+
+function applyLightGreen() {
+    applyFilter('brightness(130%) saturate(200%) hue-rotate(100deg)');
+}
+
+function applyLightPink() {
+    applyFilter('brightness(120%) contrast(100%) sepia(30%) hue-rotate(330deg)');
+}
+
+function applyLightYellow() {
+    applyFilter('brightness(140%) contrast(150%) hue-rotate(60deg)');
+}
+
+function applyGrayscale() {
+    applyFilter('grayscale(100%)');
+}
+
+function applyInverted() {
+    applyFilter('invert(100%)');
+}
+
+function applyInvertedGrayscale() {
+    applyFilter('grayscale(100%) invert(100%)');
+}
+
+function applyYellowOnBlue() {
+    applyFilter('invert(100%) sepia(100%) hue-rotate(180deg) saturate(300%) brightness(50%)');
+}
+
+function applyBlueOnYellow() {
+    applyFilter('sepia(100%) hue-rotate(180deg) saturate(300%) brightness(50%)');
+}
+
+function applyNeonOrangeOnBlack() {
+    applyFilter('invert(100%) sepia(100%) saturate(500%) hue-rotate(330deg) brightness(50%) contrast(200%)');
+}
+
+function applyNeonGreenOnBlack() {
+    applyFilter('invert(100%) sepia(100%) saturate(500%) hue-rotate(90deg) brightness(50%) contrast(200%)');
+}
+
+function applyYellowOnBlack() {
+    applyFilter('invert(100%) brightness(80%) contrast(200%) sepia(100%) hue-rotate(60deg)');
+}
+
+function applyPurpleOnBlack() {
+    applyFilter('invert(100%) brightness(70%) contrast(200%) sepia(100%) hue-rotate(300deg)');
+}
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        #header {
+            background: #333;
+            color: white;
+            padding: 10px;
+        }
+
+        input[type="file"] {
+            margin: 10px;
+        }
+
+        #controls {
+            margin: 15px 0;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #viewer-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 500px;
+            width: 60%;
+            background: white;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        #pdfViewer {
+            width: 100%;
+            max-height: 100%;
+            overflow-y: auto;
+        }
+
+        .pdf-page {
+            border: 1px solid #ddd;
+            max-width: 100%;
+            display: block;
+            margin-bottom: 10px;
+        }
+    </style>
+</body>
+</html>
